@@ -1,1 +1,36 @@
 @import 'tailwindcss';
+
+@theme {
+  /* Base Colors */
+  --color-background: #1f2a20; /* deep forest green for main background */
+  --color-text: #dce5d4; /* soft light green/cream text for readability */
+  --color-primary: #2c3a2b; /* cards, headers, modals — slightly lighter dark green */
+  --color-secondary: #4caf7c; /* secondary buttons/menus — medium teal-green */
+  --color-dark-text: #1a1a1a; /* dark text for buttons or cards with lighter background */
+  --color-accent: #f2c94c; /* vibrant yellow for accents, highlights, buttons */
+  --color-muted: #72826c; /* muted gray-green for borders, placeholders, hints */
+}
+
+@utility animate-colors {
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+@utility btn {
+  @apply flex items-center py-2 px-4 rounded-md animate-colors cursor-pointer;
+}
+
+@utility btn-primary {
+  @apply btn bg-accent text-dark-text hover:bg-accent/80;
+}
+
+@utility btn-secondary {
+  @apply btn bg-secondary text-dark-text hover:bg-accent;
+}
+
+@utility btn-outline {
+  @apply btn bg-transparent border-2 border-accent text-accent hover:bg-accent hover:text-dark-text;
+}
+
+@utility menu-item {
+  @apply block px-4 py-2 text-sm text-gray-900 data-active:bg-accent data-active:text-white;
+}
