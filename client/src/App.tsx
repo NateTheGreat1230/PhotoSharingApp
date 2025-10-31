@@ -1,31 +1,17 @@
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/mainLayout';
+import Home from './pages/home';
+import Gallery from './pages/gallery';
 
-function App() {
-  const [count, setCount] = useState(0);
-
-  async function logout() {
-    const res = await fetch('/registration/logout/', {
-      credentials: 'same-origin', // include cookies!
-    });
-
-    if (res.ok) {
-      // navigate away from the single page app!
-      window.location.href = '/registration/sign_in/';
-    } else {
-      // handle logout failed!
-    }
-  }
-
+export default function App() {
   return (
-    <>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-      <button className='text-blue-900' onClick={logout}>
-        Logout
-      </button>
-    </>
+    <BrowserRouter>
+      <MainLayout>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/gallery' element={<Gallery />} />
+        </Routes>
+      </MainLayout>
+    </BrowserRouter>
   );
 }
-
-export default App;
