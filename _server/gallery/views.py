@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import FileResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Album, Image
 import json
@@ -16,7 +16,6 @@ def albums(request):
             }
             for album in request.user.album_set.all()
         ]
-        print(albums)
         return JsonResponse({"albums": albums}, status=200)
 
     elif request.method == "POST":
@@ -57,7 +56,7 @@ def get_album(request, uid):
         {
             "uid": str(img.uid),
             "album": str(img.album.uid),
-            "file": img.file.url if img.file else None,
+            "file": f"/gallery/images/{img.uid}/",
             "uploaded_at": img.uploaded_at.isoformat(),
         }
         for img in album.images.all()
@@ -101,3 +100,16 @@ def upload_image(request, uid):
         },
         status=201,
     )
+
+
+@login_required
+def get_image(request, uid):
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    try:
+        image = Image.objects.get(uid=uid)
+    except Image.DoesNotExist:
+        return JsonResponse({"error": "Image not found"}, status=404)
+    if image.album.owner != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+    return FileResponse(image.file.open("rb"), as_attachment=False)

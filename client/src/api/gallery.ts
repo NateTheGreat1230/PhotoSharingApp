@@ -58,7 +58,12 @@ export async function fetchAlbum(uid: string) {
     credentials: 'same-origin',
   });
   if (!response.ok) throw new Error('Failed to fetch album');
-  return response.json();
+  const albumData: Album = await response.json();
+  albumData.images = albumData.images.map((img) => ({
+    ...img,
+    file: `http://127.0.0.1:8000${img.file}`,
+  }));
+  return albumData;
 }
 
 export async function uploadImage(uid: string, file: File) {
