@@ -2,16 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <style>
-    /* style your login pages here because the normal
-      static asset flow is different now */
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Photo Sharing App{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'registration/styles.css' %}" />
 </head>
 <body>
-  {% block content %}
-  {% endblock %}
+  <main class="main-container">
+    <header class="app-header">
+      <h1>Photo Sharing App</h1>
+    </header>
+    {% block content %}
+    {% endblock %}
+  </main>
 </body>
 </html>

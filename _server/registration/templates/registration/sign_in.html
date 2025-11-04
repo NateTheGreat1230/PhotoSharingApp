@@ -1,22 +1,25 @@
-{% extends "registration/base.html"%}
+{% extends "registration/base.html" %}
+
+{% block title %}Sign In | Photo Sharing App{% endblock %}
 
 {% block content %}
-<form action="/registration/sign_in/" method="post">
-  {% csrf_token %}
-  <div>
+<div class="login-container">
+  <form action="/registration/sign_in/" method="post">
+    {% csrf_token %}
+    <h2 class="form-title">Sign In</h2>
     <label>
       Email
-      <input type="email" name="email">
+      <input type="email" name="email" placeholder="you@example.com" required />
     </label>
-  </div>
-  <div>
     <label>
       Password
-      <input type="password" name="password">
+      <input type="password" name="password" placeholder="Your password" required />
     </label>
-  </div>
-  <button>Sign In</button>
-
-</form>
-<a href="/registration/sign_up/">Create New Account</a>
+    <button class="btn btn-primary" type="submit">Sign In</button>
+    <p class="signup-link">
+      Don’t have an account?
+      <a href="/registration/sign_up/">Create New Account</a>
+    </p>
+  </form>
+</div>
 {% endblock %}

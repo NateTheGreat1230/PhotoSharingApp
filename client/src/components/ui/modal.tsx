@@ -6,27 +6,23 @@ import {
 } from '@headlessui/react';
 import type { ReactNode } from 'react';
 
-interface ModalProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  title?: string;
-  children?: ReactNode;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm?: () => void;
-  showActions?: boolean;
-}
-
 export default function Modal({
   open,
   setOpen,
   title,
   children,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  onConfirm,
-  showActions = true,
-}: ModalProps) {
+  closeText = 'Close',
+  onClose,
+  showClose = true,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  title?: string;
+  children: ReactNode;
+  closeText?: string;
+  onClose?: () => void;
+  showClose?: boolean;
+}) {
   return (
     <Dialog open={open} onClose={setOpen} className='relative z-50'>
       <DialogBackdrop
@@ -47,29 +43,21 @@ export default function Modal({
                 </DialogTitle>
               )}
               <div className='text-sm'>{children}</div>
+              {showClose && (
+                <div className='pt-4 flex justify-end'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      setOpen(false);
+                      onClose?.();
+                    }}
+                    className='btn-outline'
+                  >
+                    {closeText}
+                  </button>
+                </div>
+              )}
             </div>
-
-            {showActions && (
-              <div className='px-4 py-3 flex justify-end gap-3'>
-                <button
-                  type='button'
-                  onClick={() => setOpen(false)}
-                  className='btn-outline'
-                >
-                  {cancelText}
-                </button>
-                <button
-                  type='button'
-                  onClick={() => {
-                    onConfirm?.();
-                    setOpen(false);
-                  }}
-                  className='btn-primary'
-                >
-                  {confirmText}
-                </button>
-              </div>
-            )}
           </DialogPanel>
         </div>
       </div>

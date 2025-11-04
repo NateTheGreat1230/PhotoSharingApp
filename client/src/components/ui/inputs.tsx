@@ -3,11 +3,13 @@ export function TextInput({
   error,
   placeholder,
   required,
+  changeHandler,
 }: {
   label?: string;
   error?: string;
   placeholder?: string;
   required?: boolean;
+  changeHandler?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div className='flex flex-col gap-1'>
@@ -22,6 +24,7 @@ export function TextInput({
         className={`rounded-md px-3 py-2 border ${
           error ? 'border-red-500' : 'border-accent/50'
         } bg-background text-text focus:outline-none focus:border-accent`}
+        onChange={changeHandler}
       />
       {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>

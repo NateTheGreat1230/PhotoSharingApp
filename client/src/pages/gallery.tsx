@@ -1,38 +1,66 @@
+import { useState, useEffect } from 'react';
+import { fetchAlbum, type Album, uploadImage } from '../api/gallery';
 import GalleryLayout from '../components/ui/galleryLayout';
 
 export default function Gallery() {
-  const images = [
-    { src: 'https://picsum.photos/300/400', alt: 'Photo 1' }, // portrait
-    { src: 'https://picsum.photos/400/300', alt: 'Photo 2' }, // landscape
-    { src: 'https://picsum.photos/350/350', alt: 'Photo 3' }, // square
-    { src: 'https://picsum.photos/450/300', alt: 'Photo 4' },
-    { src: 'https://picsum.photos/300/450', alt: 'Photo 5' },
-    { src: 'https://picsum.photos/400/400', alt: 'Photo 6' },
-    { src: 'https://picsum.photos/320/480', alt: 'Photo 7' },
-    { src: 'https://picsum.photos/480/320', alt: 'Photo 8' },
-    { src: 'https://picsum.photos/360/360', alt: 'Photo 9' },
-    { src: 'https://picsum.photos/500/300', alt: 'Photo 10' },
-    { src: 'https://picsum.photos/300/500', alt: 'Photo 11' },
-    { src: 'https://picsum.photos/420/350', alt: 'Photo 12' },
-    { src: 'https://picsum.photos/350/420', alt: 'Photo 13' },
-    { src: 'https://picsum.photos/400/300', alt: 'Photo 14' },
-    { src: 'https://picsum.photos/300/400', alt: 'Photo 15' },
-    { src: 'https://picsum.photos/360/360', alt: 'Photo 16' },
-    { src: 'https://picsum.photos/480/320', alt: 'Photo 17' },
-    { src: 'https://picsum.photos/320/480', alt: 'Photo 18' },
-    { src: 'https://picsum.photos/500/500', alt: 'Photo 19' },
-    { src: 'https://picsum.photos/400/400', alt: 'Photo 20' },
-    { src: 'https://picsum.photos/350/450', alt: 'Photo 21' },
-    { src: 'https://picsum.photos/450/350', alt: 'Photo 22' },
-    { src: 'https://picsum.photos/360/360', alt: 'Photo 23' },
-    { src: 'https://picsum.photos/420/300', alt: 'Photo 24' },
-    { src: 'https://picsum.photos/300/420', alt: 'Photo 25' },
-  ];
+  const [album, setAlbum] = useState<Album | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const uid = urlParams.get('album') || '';
+
+  useEffect(() => {
+    fetchAlbum(uid).then((data) => {
+      setAlbum(data);
+    });
+  }, [uid]);
+
+  async function handleUpload() {
+    if (!selectedFile || !album) return;
+    try {
+      setIsUploading(true);
+      const uploaded = await uploadImage(uid, selectedFile);
+      console.log('Upload success:', uploaded);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Failed to upload image.');
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    setSelectedFile(file || null);
+  }
 
   return (
     <div className='p-4 bg-background min-h-screen'>
       <h1 className='text-text text-2xl mb-4'>Gallery</h1>
-      <GalleryLayout images={images} />
+      {album && <h2 className='text-text text-xl mb-6'>{album.album.title}</h2>}
+      <div className='mb-6 flex flex-col gap-3 max-w-md'>
+        <input
+          type='file'
+          accept='image/*'
+          onChange={handleFileChange}
+          disabled={isUploading}
+          className='file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-accent file:text-text hover:file:bg-accent/80 text-text'
+        />
+        <button
+          onClick={handleUpload}
+          disabled={!selectedFile || isUploading}
+          className='px-4 py-2 rounded-md bg-primary text-white disabled:bg-gray-500'
+        >
+          {isUploading ? 'Uploading...' : 'Upload Image'}
+        </button>
+      </div>
+      {album?.images && album.images.length > 0 ? (
+        <GalleryLayout images={album?.images || []} />
+      ) : (
+        <p className='text-text/70'>No images in this album yet.</p>
+      )}
     </div>
   );
 }

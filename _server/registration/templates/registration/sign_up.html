@@ -1,32 +1,41 @@
-{% extends "registration/base.html"%}
+{% extends "registration/base.html" %}
+
+{% block title %}Create Account | Photo Sharing App{% endblock %}
 
 {% block content %}
-<form action="/registration/sign_up/" method="post">
-  {% csrf_token %}
-  <div>
-    <label>
-      First Name
-      <input type="text" name="first_name">
-    </label>
-  </div>
-  <div>
-    <label>
-      Last Name
-      <input type="text" name="last_name">
-    </label>
-  </div>
-  <div>
-    <label>
-      Email
-      <input type="email" name="email">
-    </label>
-  </div>
-  <div>
-    <label>
-      Password
-      <input type="password" name="password">
-    </label>
-  </div>
-  <button>Create Account</button>
-</form>
+<div class="login-container">
+  <form action="/registration/sign_up/" method="post">
+    {% csrf_token %}
+    <h2 class="form-title">Create Account</h2>
+    <div>
+      <label>
+        First Name
+        <input type="text" name="first_name" placeholder="John" required>
+      </label>
+    </div>
+    <div>
+      <label>
+        Last Name
+        <input type="text" name="last_name" placeholder="Doe" required>
+      </label>
+    </div>
+    <div>
+      <label>
+        Email
+        <input type="email" name="email" placeholder="you@example.com" required>
+      </label>
+    </div>
+    <div>
+      <label>
+        Password
+        <input type="password" name="password" placeholder="Choose a password" required>
+      </label>
+    </div>
+    <button class="btn btn-primary" type="submit">Create Account</button>
+  </form>
+    <p class="signup-link">
+      Already have an account? 
+      <a href="/registration/sign_in/">Sign In</a>
+    </p>
+</div>
 {% endblock %}

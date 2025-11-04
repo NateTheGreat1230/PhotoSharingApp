@@ -1,9 +1,17 @@
 import { useState } from 'react';
-import Modal from '../components/ui/modal';
 import { TextInput } from '../components/ui/inputs';
+import AlbumList from '../components/ui/albumList';
+import { createAlbum } from '../api/gallery';
+import ModalForm from '../components/ui/modalForm';
 
 export default function Home() {
   const [open, setOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const handleCreate = async () => {
+    if (!newTitle) return;
+    await createAlbum(newTitle);
+    setNewTitle('');
+  };
 
   return (
     <div className='p-6'>
@@ -17,31 +25,24 @@ export default function Home() {
       </button>
       <button className='btn-outline mt-3'>outline btn</button>
       <button className='btn-secondary mt-3'>btn secondary</button>
+      <AlbumList />
 
-      <Modal
+      <ModalForm
         open={open}
         setOpen={setOpen}
         title='Get Started'
-        confirmText='Create'
-      >
-        <p className='mb-4'>
-          Ready to share your first photo? Let’s create an album to get started.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert('Album created!');
-            setOpen(false);
-          }}
-          className='flex flex-col gap-3'
-        >
+        description='Ready to share your first photo? Let’s create an album to get started.'
+        formFields={
           <TextInput
             label='Album Name'
             placeholder='My Vacation Photos'
+            changeHandler={(e) => setNewTitle(e.target.value)}
             required
           />
-        </form>
-      </Modal>
+        }
+        submitText='Create'
+        onSubmit={handleCreate}
+      />
     </div>
   );
 }
