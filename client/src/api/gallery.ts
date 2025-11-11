@@ -25,6 +25,7 @@ export type Album = {
     created_at: string;
   };
   images: Image[];
+  is_shared: boolean;
 };
 
 export async function fetchAlbums() {
@@ -83,5 +84,39 @@ export async function uploadImage(uid: string, file: File) {
   });
 
   if (!response.ok) throw new Error('Failed to upload image');
+  return response.json();
+}
+
+export async function shareAlbum(uid: string, passphrase: string) {
+  const csrfToken = cookie.parse(document.cookie).csrftoken;
+  if (!csrfToken) throw new Error('CSRF token not found');
+
+  const response = await fetch(`${API_BASE}/albums/${uid}/share/`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken,
+    },
+    body: JSON.stringify({ passphrase }),
+  });
+
+  if (!response.ok) throw new Error('Failed to share album');
+  return response.json();
+}
+
+export async function unShareAlbum(uid: string) {
+  const csrfToken = cookie.parse(document.cookie).csrftoken;
+  if (!csrfToken) throw new Error('CSRF token not found');
+
+  const response = await fetch(`${API_BASE}/albums/${uid}/unshare/`, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+    headers: {
+      'X-CSRFToken': csrfToken,
+    },
+  });
+
+  if (!response.ok) throw new Error('Failed to unshare album');
   return response.json();
 }

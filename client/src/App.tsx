@@ -4,6 +4,7 @@ import Home from './pages/home';
 import Gallery from './pages/gallery';
 import NotFoundPage from './pages/notfound';
 import Profile from './pages/profile';
+import Shared from './pages/shared';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route path='/' element={<Home />} />
           <Route path='/gallery' element={<Gallery />} />
           <Route path='/profile' element={<Profile />} />
+          <Route path='/shared' element={<Shared />} />
           <Route path='*' element={<NotFoundPage />} />
         </Routes>
       </MainLayout>
