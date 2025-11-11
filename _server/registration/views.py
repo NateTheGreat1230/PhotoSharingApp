@@ -53,13 +53,12 @@ def logout_view(request):
     return JsonResponse({"success": True})
 
 
-def enter_passphrase(request):
+def enter_passphrase(request, uid):
     TemporaryUser.objects.filter(expires_at__lt=timezone.now()).delete()
     if request.method == "POST":
         passphrase = request.POST.get("passphrase")
         if passphrase:
-            sharedLink = SharedLink.objects.first()
-            print("Shared link found:", sharedLink.passphrase)
+            sharedLink = SharedLink.objects.get(uid=uid)
             if sharedLink.check_passphrase(passphrase):
                 tempUser = TemporaryUser.objects.create(sharedLink=sharedLink)
                 token = signer.sign(str(tempUser.uid))
@@ -77,32 +76,4 @@ def enter_passphrase(request):
 
         else:
             return JsonResponse({"error": "Passphrase is required"}, status=400)
-    return render(request, "registration/enter_passphrase.html")
-
-
-# def enter_passphrase(request, uid):
-#     print("Entering passphrase view")
-#     TemporaryUser.objects.filter(expires_at__lt=timezone.now()).delete()
-#     if request.method == "POST":
-#         passphrase = request.POST.get("passphrase")
-#         if passphrase:
-#             sharedLink = SharedLink.objects.get(uid=uid)
-#             if sharedLink.check_passphrase(passphrase):
-#                 tempUser = TemporaryUser.objects.create(sharedLink=sharedLink)
-#                 token = signer.sign(str(tempUser.uid))
-#                 response = redirect(f"/gallery/shared_album/{uid}/")
-#                 response.set_cookie(
-#                     f"temp_user_{tempUser.uid}", token, max_age=24 * 3600
-#                 )
-#                 return response
-#             else:
-#                 return render(
-#                     request,
-#                     "registration/enter_passphrase.html",
-#                     {"error": "Incorrect passphrase."},
-#                 )
-
-#         else:
-#             return JsonResponse({"error": "Passphrase is required"}, status=400)
-#     else:
-#         return render(request, "registration/enter_passphrase.html")
+    return render(request, "registration/enter_passphrase.html", {"uid": uid})
