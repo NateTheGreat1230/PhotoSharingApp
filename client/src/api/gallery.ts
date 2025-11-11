@@ -17,6 +17,12 @@ export type Image = {
   uploaded_at: string;
 };
 
+export type SharedLink = {
+  uid: string;
+  created_at: string;
+  link: string;
+};
+
 export type Album = {
   album: {
     owner: string;
@@ -26,6 +32,7 @@ export type Album = {
   };
   images: Image[];
   is_shared: boolean;
+  shared_link: SharedLink | null;
 };
 
 export async function fetchAlbums() {
@@ -64,6 +71,12 @@ export async function fetchAlbum(uid: string) {
     ...img,
     file: `http://127.0.0.1:8000${img.file}`,
   }));
+  if (albumData.is_shared) {
+    albumData.shared_link = {
+      ...albumData.shared_link!,
+      link: `http://127.0.0.1:8000${albumData.shared_link!.link}`,
+    };
+  }
   return albumData;
 }
 

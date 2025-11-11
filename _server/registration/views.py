@@ -36,6 +36,8 @@ def sign_in(req):
 
         return render(req, "registration/sign_in.html")
     else:
+        if hasattr(req, "temp_user") and req.temp_user:
+            pass
         return render(req, "registration/sign_in.html")
 
 

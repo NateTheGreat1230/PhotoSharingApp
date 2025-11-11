@@ -62,7 +62,9 @@ def get_album(request, uid):
         }
         for img in album.images.all()
     ]
-    is_shared = SharedLink.objects.filter(album=album).exists()
+    shared = SharedLink.objects.filter(album=album)
+    is_shared = shared.exists()
+
     return JsonResponse(
         {
             "album": {
@@ -73,6 +75,15 @@ def get_album(request, uid):
             },
             "images": images,
             "is_shared": is_shared,
+            "shared_link": (
+                {
+                    "uid": str(shared[0].uid),
+                    "created_at": shared[0].created_at.isoformat(),
+                    "link": f"/registration/shared/{shared[0].uid}/authenticate/",
+                }
+                if is_shared
+                else None
+            ),
         },
         status=200,
     )
@@ -135,6 +146,8 @@ def create_shared_link(request, uid):
     passphrase = body.get("passphrase")
     if not passphrase:
         return JsonResponse({"error": "Passphrase is required"}, status=400)
+    if SharedLink.objects.filter(album=album).exists():
+        return JsonResponse({"error": "Shared link already exists"}, status=400)
     shared_link = SharedLink(album=album)
     shared_link.set_passphrase(passphrase)
     shared_link.save()
