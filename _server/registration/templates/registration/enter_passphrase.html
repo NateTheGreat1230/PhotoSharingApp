@@ -1,0 +1,21 @@
+{% extends "registration/base.html" %}
+
+{% block title %}Enter Passphrase | Photo Sharing App{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <form action="/registration/enter_passphrase/" method="post">
+    {% csrf_token %}
+    <h2 class="form-title">Enter Passphrase</h2>
+    <label>
+      Passphrase
+      <input type="password" name="passphrase" placeholder="Enter your passphrase" required />
+    </label>
+    <button class="btn btn-primary" type="submit">Submit</button>
+    <p class="signup-link">
+      Own this album?
+      <a href="/registration/sign_in/">Sign In</a>
+    </p>
+  </form>
+</div>
+{% endblock %}
