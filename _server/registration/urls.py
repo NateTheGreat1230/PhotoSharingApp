@@ -7,4 +7,5 @@ urlpatterns = [
     path("logout/", views.logout_view),
     # path("enter_passphrase/<uuid:uid>/", views.enter_passphrase),
     path("enter_passphrase/", views.enter_passphrase),
+    path("auth/user_type/", views.get_user_type),
 ]

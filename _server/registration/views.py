@@ -36,9 +36,16 @@ def sign_in(req):
 
         return render(req, "registration/sign_in.html")
     else:
-        if req.temp_user:
-            print("Temp user detected in sign-in view:", req.temp_user.uid)
         return render(req, "registration/sign_in.html")
+
+
+def get_user_type(request):
+    if request.user.is_authenticated:
+        return JsonResponse({"user_type": "registered"}, status=200)
+    elif hasattr(request, "temp_user") and request.temp_user is not None:
+        return JsonResponse({"user_type": "temporary"}, status=200)
+    else:
+        return JsonResponse({"user_type": "anonymous"}, status=200)
 
 
 def logout_view(request):
