@@ -1,6 +1,5 @@
 from django.utils.deprecation import MiddlewareMixin
-from django.core.signing import BadSignature, Signer
-from django.utils import timezone
+from django.core.signing import Signer
 from gallery.models import TemporaryUser
 
 signer = Signer()

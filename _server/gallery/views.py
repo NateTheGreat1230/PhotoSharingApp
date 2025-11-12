@@ -69,7 +69,7 @@ def get_album(request, uid):
         {
             "album": {
                 "uid": str(album.uid),
-                "owner": album.owner.username,
+                "owner": f"{album.owner.first_name} {album.owner.last_name}",
                 "title": album.title,
                 "created_at": album.created_at.isoformat(),
             },
@@ -209,34 +209,13 @@ def get_shared(request, uid):
             "album": {
                 "uid": str(shared_link.album.uid),
                 "title": shared_link.album.title,
-                "owner": shared_link.album.owner.username,
+                "owner": f"{shared_link.album.owner.first_name} {shared_link.album.owner.last_name}",
                 "created_at": shared_link.album.created_at.isoformat(),
             },
             "images": images,
         },
         status=200,
     )
-
-
-@allow_temp_user
-def verify_shared(request, uid):
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid request method"}, status=405)
-    try:
-        shared_link = SharedLink.objects.get(uid=uid)
-    except SharedLink.DoesNotExist:
-        return JsonResponse({"error": "Shared link not found"}, status=404)
-    try:
-        body = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-    passphrase = body.get("passphrase")
-    if not passphrase:
-        return JsonResponse({"error": "Passphrase is required"}, status=400)
-    if shared_link.check_passphrase(passphrase):
-        return JsonResponse({"message": "Passphrase is correct"}, status=200)
-    else:
-        return JsonResponse({"error": "Incorrect passphrase"}, status=403)
 
 
 @allow_temp_user

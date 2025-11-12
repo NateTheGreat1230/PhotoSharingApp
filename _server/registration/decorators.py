@@ -9,9 +9,14 @@ signer = Signer()
 def allow_temp_user(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if request.user.is_authenticated or hasattr(request, "temp_user"):
+        if request.user.is_authenticated:
             return view_func(request, *args, **kwargs)
-        # Neither normal nor temp user, redirect
-        return redirect("/registration/sign_in/")
+        elif (
+            hasattr(request, "temp_user")
+            and TemporaryUser.objects.filter(uid=request.temp_user.uid).exists()
+        ):
+            return view_func(request, *args, **kwargs)
+        else:
+            return redirect("/registration/sign_in/")
 
     return wrapper

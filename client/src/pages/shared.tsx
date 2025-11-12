@@ -5,19 +5,25 @@ import {
   uploadSharedImage,
   type SharedAlbum,
 } from '../api/shared';
+import Loading from '../components/ui/loading';
+import ErrorComponent from '../components/ui/error';
+import AlbumInfoCard from '../components/ui/albumInfo';
 
 export default function Shared() {
   const [album, setAlbum] = useState<SharedAlbum | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
   const uid = urlParams.get('album') || '';
 
   useEffect(() => {
-    getSharedAlbum(uid).then((data) => {
-      setAlbum(data);
-    });
+    getSharedAlbum(uid)
+      .then((data) => {
+        setAlbum(data);
+      })
+      .finally(() => setLoading(false));
   }, [uid]);
 
   async function handleUpload() {
@@ -40,10 +46,25 @@ export default function Shared() {
     setSelectedFile(file || null);
   }
 
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (!album && !loading) {
+    return (
+      <ErrorComponent message='Unable to load album. It may not exist or you may not have access.' />
+    );
+  }
+
   return (
-    <div className='p-4 bg-background min-h-screen'>
-      <h1 className='text-text text-2xl mb-4'>Gallery</h1>
-      {album && <h2 className='text-text text-xl mb-6'>{album.album.title}</h2>}
+    <>
+      {album && (
+        <AlbumInfoCard
+          owner={album.album.owner}
+          title={album.album.title}
+          created_at={album.album.created_at}
+        />
+      )}
       <div className='mb-6 flex flex-col gap-3 max-w-md'>
         <input
           type='file'
@@ -65,6 +86,6 @@ export default function Shared() {
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}
-    </div>
+    </>
   );
 }

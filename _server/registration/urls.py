@@ -11,4 +11,5 @@ urlpatterns = [
         name="enter_passphrase",
     ),
     path("auth/user_type/", views.get_user_type),
+    path("auth/get_user/", views.get_user),
 ]

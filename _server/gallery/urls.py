@@ -11,7 +11,6 @@ urlpatterns = [
     path("albums/<uuid:uid>/images/", views.upload_image, name="upload_image"),
     path("images/<uuid:uid>/", views.get_image, name="get_image"),
     path("shared/<uuid:uid>/", views.get_shared, name="get_shared"),
-    path("shared/<uuid:uid>/verify", views.verify_shared, name="verify_shared"),
     path(
         "shared/<uuid:uid>/images/",
         views.upload_shared_image,

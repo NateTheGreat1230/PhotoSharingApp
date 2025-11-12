@@ -1,10 +1,10 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Link } from 'react-router-dom';
-import PlusIcon from '../icons/plusIcon';
 import HamburgerIcon from '../icons/hamburgerIcon';
 import PersonIcon from '../icons/personIcon';
+import { logout, type User } from '../../api/auth';
 
-export default function HeaderBar() {
+export default function HeaderBar({ user }: { user: User | null }) {
   return (
     <header className='flex items-center justify-between px-4 py-2 bg-primary text-text shadow-md rounded-b-lg'>
       <Menu as='div' className='relative'>
@@ -30,15 +30,15 @@ export default function HeaderBar() {
       <h1 className='text-lg font-semibold'>PhotoApp</h1>
 
       <div className='flex items-center gap-2'>
-        <button
-          className='p-2 rounded-md bg-accent text-white hover:bg-accent/80 animate-colors'
-          title='Add'
-        >
-          <PlusIcon classes='w-6 h-6' />
-        </button>
         <Menu as='div' className='relative'>
           <MenuButton className='p-2 rounded-full hover:bg-accent/20 animate-colors'>
-            <PersonIcon classes='w-6 h-6' />
+            <span className='flex items-center'>
+              <span className='hidden md:flex items-center gap-3 mr-3'>
+                <span className=''>{user?.full_name}</span>
+                <span className='border-l border-white h-6' />
+              </span>
+              <PersonIcon classes='w-6 h-6' />
+            </span>
           </MenuButton>
           <MenuItems
             anchor='bottom end'
@@ -51,13 +51,7 @@ export default function HeaderBar() {
               <div className='border-t border-gray-200' />
               <MenuItem
                 as='button'
-                onClick={() => {
-                  fetch('/registration/logout/', {
-                    credentials: 'same-origin',
-                  }).then(() => {
-                    window.location.href = '/registration/sign_in/';
-                  });
-                }}
+                onClick={() => logout()}
                 className='menu-item'
               >
                 Logout

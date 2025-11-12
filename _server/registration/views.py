@@ -50,6 +50,21 @@ def get_user_type(request):
         return JsonResponse({"user_type": "anonymous"}, status=200)
 
 
+def get_user(request):
+    if request.user.is_authenticated:
+        return JsonResponse(
+            {
+                "username": request.user.username,
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+                "email": request.user.email,
+            },
+            status=200,
+        )
+    else:
+        return JsonResponse({"error": "User not authenticated"}, status=401)
+
+
 def logout_view(request):
     logout(request)
     return JsonResponse({"success": True})
