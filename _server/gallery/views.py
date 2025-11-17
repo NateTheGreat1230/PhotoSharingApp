@@ -90,7 +90,21 @@ def get_album(request, uid):
 
 
 @login_required
-def upload_image(request, uid):
+def delete_album(request, uid):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    try:
+        album = Album.objects.get(uid=uid)
+    except Album.DoesNotExist:
+        return JsonResponse({"error": "Album not found"}, status=404)
+    if album.owner != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+    album.delete()
+    return JsonResponse({"message": "Album deleted"}, status=200)
+
+
+@login_required
+def upload_images(request, uid):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
     try:
@@ -99,20 +113,31 @@ def upload_image(request, uid):
         return JsonResponse({"error": "Album not found"}, status=404)
     if album.owner != request.user:
         return JsonResponse({"error": "Unauthorized"}, status=403)
-    uploaded_file = request.FILES.get("file")
-    if not uploaded_file:
-        return JsonResponse({"error": "No file provided"}, status=400)
-    image = Image.objects.create(album=album, file=uploaded_file)
+    files = request.FILES.getlist("files")
+    if not files:
+        return JsonResponse({"error": "No files provided"}, status=400)
+    uploaded = []
+    failed = []
+    for f in files:
+        try:
+            img = Image.objects.create(album=album, file=f)
+            uploaded.append(
+                {
+                    "uid": str(img.uid),
+                    "file": img.file.url,
+                    "uploaded_at": img.uploaded_at.isoformat(),
+                }
+            )
+        except Exception as e:
+            failed.append({"filename": f.name, "error": str(e)})
     return JsonResponse(
         {
-            "image": {
-                "uid": str(image.uid),
-                "album": str(image.album.uid),
-                "file": image.file.url if image.file else None,
-                "uploaded_at": image.uploaded_at.isoformat(),
-            },
+            "success_count": len(uploaded),
+            "fail_count": len(failed),
+            "uploaded": uploaded,
+            "failed": failed,
         },
-        status=201,
+        status=207 if failed else 201,
     )
 
 
@@ -155,8 +180,8 @@ def create_shared_link(request, uid):
         {
             "shared_link": {
                 "uid": str(shared_link.uid),
-                "album": str(shared_link.album.uid),
-                "passphrase": shared_link.passphrase,
+                "created_at": shared_link.created_at.isoformat(),
+                "link": f"/registration/shared/{shared_link.uid}/authenticate/",
             }
         },
         status=201,
@@ -178,7 +203,7 @@ def delete_shared(request, uid):
     except SharedLink.DoesNotExist:
         return JsonResponse({"error": "Shared link not found"}, status=404)
     shared_link.delete()
-    return JsonResponse({"message": "Shared link deleted"}, status=204)
+    return JsonResponse({"message": "Shared link deleted"}, status=200)
 
 
 # Additional view functions for shared links
@@ -219,29 +244,38 @@ def get_shared(request, uid):
 
 
 @allow_temp_user
-def upload_shared_image(request, uid):
+def upload_shared_images(request, uid):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
     try:
         shared_link = SharedLink.objects.get(uid=uid)
-        print("Uploading to shared link:", shared_link.uid)
     except SharedLink.DoesNotExist:
         return JsonResponse({"error": "Shared link not found"}, status=404)
-    uploaded_file = request.FILES.get("file")
-    if not uploaded_file:
-        return JsonResponse({"error": "No file provided"}, status=400)
-    print("Uploading file to shared album:", shared_link.album.uid)
-    image = Image.objects.create(album=shared_link.album, file=uploaded_file)
+    files = request.FILES.getlist("files")
+    if not files:
+        return JsonResponse({"error": "No files provided"}, status=400)
+    uploaded = []
+    failed = []
+    for f in files:
+        try:
+            img = Image.objects.create(album=shared_link.album, file=f)
+            uploaded.append(
+                {
+                    "uid": str(img.uid),
+                    "file": img.file.url,
+                    "uploaded_at": img.uploaded_at.isoformat(),
+                }
+            )
+        except Exception as e:
+            failed.append({"filename": f.name, "error": str(e)})
     return JsonResponse(
         {
-            "image": {
-                "uid": str(image.uid),
-                "album": str(image.album.uid),
-                "file": image.file.url if image.file else None,
-                "uploaded_at": image.uploaded_at.isoformat(),
-            },
+            "success_count": len(uploaded),
+            "fail_count": len(failed),
+            "uploaded": uploaded,
+            "failed": failed,
         },
-        status=201,
+        status=207 if failed else 201,
     )
 
 

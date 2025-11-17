@@ -80,13 +80,30 @@ export async function fetchAlbum(uid: string) {
   return albumData;
 }
 
-export async function uploadImage(uid: string, file: File) {
+export async function deleteAlbum(uid: string) {
+  const csrfToken = cookie.parse(document.cookie).csrftoken;
+  if (!csrfToken) throw new Error('CSRF token not found');
+
+  const response = await fetch(`${API_BASE}/albums/${uid}/delete/`, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+    headers: {
+      'X-CSRFToken': csrfToken,
+    },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete album');
+  return response.json();
+}
+
+export async function uploadImages(uid: string, files: File[]) {
   const csrfToken = cookie.parse(document.cookie).csrftoken;
   if (!csrfToken) throw new Error('CSRF token not found');
 
   const formData = new FormData();
-  formData.append('file', file);
-
+  for (const file of files) {
+    formData.append('files', file);
+  }
   const response = await fetch(`${API_BASE}/albums/${uid}/images/`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -96,7 +113,7 @@ export async function uploadImage(uid: string, file: File) {
     body: formData,
   });
 
-  if (!response.ok) throw new Error('Failed to upload image');
+  if (!response.ok) throw new Error('Failed to upload images');
   return response.json();
 }
 
@@ -113,9 +130,13 @@ export async function shareAlbum(uid: string, passphrase: string) {
     },
     body: JSON.stringify({ passphrase }),
   });
-
   if (!response.ok) throw new Error('Failed to share album');
-  return response.json();
+  const sharedLink: SharedLink = await response.json();
+  console.log('Raw shared link data:', sharedLink);
+  if (sharedLink) {
+    sharedLink.link = `http://127.0.0.1:8000${sharedLink.link}`;
+  }
+  return sharedLink;
 }
 
 export async function unShareAlbum(uid: string) {

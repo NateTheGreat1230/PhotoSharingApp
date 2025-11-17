@@ -11,7 +11,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className='min-h-screen flex flex-col bg-background text-text font-sans'>
       <HeaderBar user={user} />
-      <main className='flex-1'>{children}</main>
+      <main className='flex-1 p-4'>{children}</main>
       <Footer />
     </div>
   );

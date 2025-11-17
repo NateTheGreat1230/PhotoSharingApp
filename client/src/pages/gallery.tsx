@@ -2,56 +2,60 @@ import { useState, useEffect } from 'react';
 import {
   fetchAlbum,
   type Album,
-  uploadImage,
+  uploadImages,
   shareAlbum,
   unShareAlbum,
 } from '../api/gallery';
 import GalleryLayout from '../components/ui/galleryLayout';
 import ModalForm from '../components/ui/modalForm';
+import MultiImageUploadModal from '../components/ui/imageUploadModal';
+import AlbumInfoCard from '../components/ui/albumInfo';
+import PlusIcon from '../components/icons/plusIcon';
+import Loading from '../components/ui/loading';
+import ErrorComponent from '../components/ui/error';
+import ShareIcon from '../components/icons/shareIcon';
 
 export default function Gallery() {
   const [album, setAlbum] = useState<Album | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [passphrase, setPassphrase] = useState('');
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
   const uid = urlParams.get('album') || '';
 
   useEffect(() => {
-    fetchAlbum(uid).then((data) => {
-      setAlbum(data);
-    });
+    fetchAlbum(uid)
+      .then((data) => {
+        setAlbum(data);
+      })
+      .finally(() => setLoading(false));
   }, [uid]);
 
-  async function handleUpload() {
-    if (!selectedFile || !album) return;
-    try {
-      setIsUploading(true);
-      const uploaded = await uploadImage(uid, selectedFile);
-      console.log('Upload success:', uploaded);
-      setSelectedFile(null);
-    } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Failed to upload image.');
-    } finally {
-      setIsUploading(false);
-    }
-  }
+  useEffect(() => {
+    console.log('Album data updated:', album);
+  }, [album]);
 
   async function handleShare() {
     if (passphrase.trim() === '' || !album) return;
+
     try {
-      shareAlbum(uid, passphrase).then((data) => {
-        const shareLink = `${window.location.origin}/registration/enter_passphrase`;
-        alert(
-          `Shareable Link: ${shareLink} with passphrase: ${data.passphrase} and album id: ${data.uid}`
-        );
+      const data = await shareAlbum(uid, passphrase);
+
+      alert(`Shareable Link: ${data.link}\nPassphrase: ${passphrase}`);
+
+      setAlbum({
+        ...album,
+        is_shared: true,
+        shared_link: {
+          uid: data.uid,
+          link: data.link,
+          created_at: data.created_at,
+        },
       });
     } catch (err) {
       console.error('Share failed:', err);
-      alert('Failed to share album.');
     } finally {
       setShareModalOpen(false);
     }
@@ -61,56 +65,77 @@ export default function Gallery() {
     if (!album) return;
     try {
       await unShareAlbum(uid);
-      alert('Album unshared successfully.');
+      setAlbum({ ...album, is_shared: false, shared_link: null });
     } catch (err) {
       console.error('Unshare failed:', err);
-      alert('Failed to unshare album.');
     }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    setSelectedFile(file || null);
+  async function deleteAlbum(uid: string) {
+    if (!album) return;
+    try {
+      await deleteAlbum(uid);
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Delete album failed:', err);
+    }
+  }
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (!album && !loading) {
+    return (
+      <ErrorComponent message='Unable to load album. It may not exist or you may not have access.' />
+    );
   }
 
   return (
-    <div className='p-4 bg-background min-h-screen'>
-      <h1 className='text-text text-2xl mb-4'>Gallery</h1>
-      {album && <h2 className='text-text text-xl mb-6'>{album.album.title}</h2>}
-      <div className='mb-6 flex flex-col gap-3 max-w-md'>
-        <input
-          type='file'
-          accept='image/*'
-          onChange={handleFileChange}
-          disabled={isUploading}
-          className='file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-accent file:text-text hover:file:bg-accent/80 text-text'
+    <>
+      {album && (
+        <AlbumInfoCard
+          owner={album.album.owner}
+          title={album.album.title}
+          created_at={album.album.created_at}
+          shared={album.is_shared}
+          shared_link={album.shared_link}
+          actions={
+            <div className='flex flex-col gap-2'>
+              <button
+                className='p-2 rounded-md bg-accent text-white hover:bg-accent/80 animate-colors'
+                title='Add'
+                onClick={() => setIsUploadModalOpen(true)}
+              >
+                <PlusIcon classes='w-6 h-6' />
+              </button>
+              {album.is_shared ? (
+                <button
+                  className='p-2 rounded-md bg-red-500 text-white hover:bg-red-600 animate-colors'
+                  title='Unshare Album'
+                  onClick={handleUnshare}
+                >
+                  <ShareIcon classes='w-6 h-6 rotate-180' />
+                </button>
+              ) : (
+                <button
+                  className='p-2 rounded-md bg-accent text-white hover:bg-accent/80 animate-colors'
+                  title='Share Album'
+                  onClick={() => setShareModalOpen(true)}
+                >
+                  <ShareIcon classes='w-6 h-6' />
+                </button>
+              )}
+            </div>
+          }
         />
-        <button
-          onClick={handleUpload}
-          disabled={!selectedFile || isUploading}
-          className='px-4 py-2 rounded-md bg-primary text-white disabled:bg-gray-500'
-        >
-          {isUploading ? 'Uploading...' : 'Upload Image'}
-        </button>
-      </div>
-      {album?.is_shared ? (
-        <button className='btn-secondary mb-4' onClick={handleUnshare}>
-          Unshare Album
-        </button>
-      ) : (
-        <button
-          onClick={() => setShareModalOpen(true)}
-          className='btn-secondary mb-4'
-        >
-          Share Album
-        </button>
       )}
+      <button onClick={() => deleteAlbum(uid)}>Delete Album</button>
       {album?.images && album.images.length > 0 ? (
         <GalleryLayout images={album?.images || []} />
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}
-      {/* Share Modal */}
       <ModalForm
         open={shareModalOpen}
         setOpen={setShareModalOpen}
@@ -128,6 +153,12 @@ export default function Gallery() {
         submitText='Generate Link'
         onSubmit={handleShare}
       />
-    </div>
+      <MultiImageUploadModal
+        open={isUploadModalOpen}
+        setOpen={setIsUploadModalOpen}
+        onUpload={(files) => uploadImages(uid, files)}
+        albumTitle={album?.album.title}
+      />
+    </>
   );
 }

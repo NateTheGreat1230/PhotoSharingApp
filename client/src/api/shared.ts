@@ -31,12 +31,14 @@ export async function getSharedAlbum(uid: string) {
   return albumData;
 }
 
-export async function uploadSharedImage(uid: string, file: File) {
+export async function uploadSharedImages(uid: string, files: File[]) {
   const csrfToken = cookie.parse(document.cookie).csrftoken;
   if (!csrfToken) throw new Error('CSRF token not found');
 
   const formData = new FormData();
-  formData.append('file', file);
+  for (const file of files) {
+    formData.append('files', file);
+  }
 
   const response = await fetch(`${API_BASE}/${uid}images/`, {
     method: 'POST',
@@ -47,6 +49,6 @@ export async function uploadSharedImage(uid: string, file: File) {
     body: formData,
   });
 
-  if (!response.ok) throw new Error('Failed to upload image to shared album');
+  if (!response.ok) throw new Error('Failed to upload images to shared album');
   return response.json();
 }

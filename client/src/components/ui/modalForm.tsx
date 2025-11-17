@@ -6,6 +6,7 @@ export default function ModalForm({
   title,
   description,
   formFields,
+  submitDisabled,
   submitText = 'Submit',
   cancelText = 'Cancel',
   onSubmit,
@@ -15,6 +16,7 @@ export default function ModalForm({
   title: string;
   description: string;
   formFields: React.ReactNode;
+  submitDisabled?: boolean;
   submitText?: string;
   cancelText?: string;
   onSubmit?: () => void;
@@ -43,6 +45,7 @@ export default function ModalForm({
                 onSubmit?.();
                 setOpen(false);
               }}
+              disabled={submitDisabled}
               className='btn-primary'
             >
               {submitText}
