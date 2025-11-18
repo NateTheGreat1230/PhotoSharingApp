@@ -44,6 +44,7 @@ export default function Shared() {
           owner={album.album.owner}
           title={album.album.title}
           created_at={album.album.created_at}
+          showSharedStatus={false}
           actions={
             <button
               className='p-2 rounded-md bg-accent text-white hover:bg-accent/80 animate-colors'
@@ -56,7 +57,7 @@ export default function Shared() {
         />
       )}
       {album?.images && album.images.length > 0 ? (
-        <GalleryLayout images={album?.images || []} />
+        <GalleryLayout images={album?.images || []} deleteFn={() => {}} />
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}

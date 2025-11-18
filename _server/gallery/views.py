@@ -155,6 +155,20 @@ def get_image(request, uid):
 
 
 @login_required
+def delete_image(request, uid):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    try:
+        image = Image.objects.get(uid=uid)
+    except Image.DoesNotExist:
+        return JsonResponse({"error": "Image not found"}, status=404)
+    if image.album.owner != request.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+    image.delete()
+    return JsonResponse({"message": "Image deleted"}, status=200)
+
+
+@login_required
 def create_shared_link(request, uid):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
@@ -292,3 +306,19 @@ def get_shared_image(request, uid, image_uid):
     except Image.DoesNotExist:
         return JsonResponse({"error": "Image not found"}, status=404)
     return FileResponse(image.file.open("rb"), as_attachment=False)
+
+
+@allow_temp_user
+def delete_shared_image(request, uid, image_uid):
+    if request.method != "DELETE":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    try:
+        shared_link = SharedLink.objects.get(uid=uid)
+    except SharedLink.DoesNotExist:
+        return JsonResponse({"error": "Shared link not found"}, status=404)
+    try:
+        image = Image.objects.get(uid=image_uid, album=shared_link.album)
+    except Image.DoesNotExist:
+        return JsonResponse({"error": "Image not found"}, status=404)
+    image.delete()
+    return JsonResponse({"message": "Image deleted"}, status=200)

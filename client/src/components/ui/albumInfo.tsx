@@ -8,6 +8,7 @@ export default function AlbumInfoCard({
   shared,
   shared_link,
   actions,
+  showSharedStatus = true,
 }: {
   owner: string;
   title: string;
@@ -15,6 +16,7 @@ export default function AlbumInfoCard({
   shared?: boolean;
   shared_link?: SharedLink | null;
   actions?: ReactNode;
+  showSharedStatus?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -46,25 +48,26 @@ export default function AlbumInfoCard({
             })}
           </span>
         </div>
-        {shared ? (
-          <div
-            className='flex items-center gap-2 cursor-pointer group'
-            onClick={handleCopyShareInfo}
-          >
-            <span className='text-accent font-medium underline group-hover:text-accent/80 transition-colors'>
-              Shared Album (click to copy)
-            </span>
-            {copied && (
-              <span className='text-xs bg-black/70 text-white px-2 py-1 rounded-md'>
-                Copied!
+        {showSharedStatus &&
+          (shared ? (
+            <div
+              className='flex items-center gap-2 cursor-pointer group'
+              onClick={handleCopyShareInfo}
+            >
+              <span className='text-accent font-medium underline group-hover:text-accent/80 transition-colors'>
+                Shared Album (click to copy)
               </span>
-            )}
-          </div>
-        ) : (
-          <div className='flex items-center gap-2'>
-            <span className='text-red-400 font-medium'>Private Album</span>
-          </div>
-        )}
+              {copied && (
+                <span className='text-xs bg-black/70 text-white px-2 py-1 rounded-md'>
+                  Copied!
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className='flex items-center gap-2'>
+              <span className='text-red-400 font-medium'>Private Album</span>
+            </div>
+          ))}
       </div>
       {actions && <div className='absolute top-6 right-6'>{actions}</div>}
     </div>

@@ -11,6 +11,7 @@ urlpatterns = [
     path("albums/<uuid:uid>/unshare/", views.delete_shared, name="delete_shared"),
     path("albums/<uuid:uid>/images/", views.upload_images, name="upload_images"),
     path("images/<uuid:uid>/", views.get_image, name="get_image"),
+    path("images/<uuid:uid>/delete/", views.delete_image, name="delete_image"),
     path("shared/<uuid:uid>/", views.get_shared, name="get_shared"),
     path(
         "shared/<uuid:uid>/images/",
@@ -21,5 +22,10 @@ urlpatterns = [
         "shared/<uuid:uid>/images/<uuid:image_uid>/",
         views.get_shared_image,
         name="get_shared_image",
+    ),
+    path(
+        "shared/<uuid:uid>/images/<uuid:image_uid>/delete/",
+        views.delete_shared_image,
+        name="delete_shared_image",
     ),
 ]

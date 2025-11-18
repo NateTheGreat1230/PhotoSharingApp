@@ -117,6 +117,22 @@ export async function uploadImages(uid: string, files: File[]) {
   return response.json();
 }
 
+export async function deleteImage(_albumUid: string, imageUid: string) {
+  const csrfToken = cookie.parse(document.cookie).csrftoken;
+  if (!csrfToken) throw new Error('CSRF token not found');
+
+  const response = await fetch(`${API_BASE}/images/${imageUid}/delete/`, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+    headers: {
+      'X-CSRFToken': csrfToken,
+    },
+  });
+
+  if (!response.ok) throw new Error('Failed to delete image');
+  return response.json();
+}
+
 export async function shareAlbum(uid: string, passphrase: string) {
   const csrfToken = cookie.parse(document.cookie).csrftoken;
   if (!csrfToken) throw new Error('CSRF token not found');

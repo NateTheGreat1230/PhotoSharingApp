@@ -5,6 +5,7 @@ import {
   uploadImages,
   shareAlbum,
   unShareAlbum,
+  deleteImage,
 } from '../api/gallery';
 import GalleryLayout from '../components/ui/galleryLayout';
 import ModalForm from '../components/ui/modalForm';
@@ -132,7 +133,7 @@ export default function Gallery() {
       )}
       <button onClick={() => deleteAlbum(uid)}>Delete Album</button>
       {album?.images && album.images.length > 0 ? (
-        <GalleryLayout images={album?.images || []} />
+        <GalleryLayout images={album?.images || []} deleteFn={deleteImage} />
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}

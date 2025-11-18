@@ -52,3 +52,22 @@ export async function uploadSharedImages(uid: string, files: File[]) {
   if (!response.ok) throw new Error('Failed to upload images to shared album');
   return response.json();
 }
+
+export async function deleteSharedImage(sharedUid: string, imageUid: string) {
+  const csrfToken = cookie.parse(document.cookie).csrftoken;
+  if (!csrfToken) throw new Error('CSRF token not found');
+
+  const response = await fetch(
+    `${API_BASE}/${sharedUid}/images/${imageUid}/delete/`,
+    {
+      method: 'DELETE',
+      credentials: 'same-origin',
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+    }
+  );
+
+  if (!response.ok) throw new Error('Failed to delete image from shared album');
+  return response.json();
+}
