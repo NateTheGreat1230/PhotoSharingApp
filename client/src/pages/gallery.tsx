@@ -6,6 +6,7 @@ import {
   shareAlbum,
   unShareAlbum,
   deleteImage,
+  deleteAlbum,
 } from '../api/gallery';
 import GalleryLayout from '../components/ui/galleryLayout';
 import ModalForm from '../components/ui/modalForm';
@@ -15,12 +16,14 @@ import PlusIcon from '../components/icons/plusIcon';
 import Loading from '../components/ui/loading';
 import ErrorComponent from '../components/ui/error';
 import ShareIcon from '../components/icons/shareIcon';
+import TrashIcon from '../components/icons/trashIcon';
 
 export default function Gallery() {
   const [album, setAlbum] = useState<Album | null>(null);
   const [passphrase, setPassphrase] = useState('');
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -72,13 +75,34 @@ export default function Gallery() {
     }
   }
 
-  async function deleteAlbum(uid: string) {
+  async function handleDeleteAlbum(uid: string) {
     if (!album) return;
     try {
       await deleteAlbum(uid);
       window.location.href = '/';
     } catch (err) {
       console.error('Delete album failed:', err);
+    }
+  }
+
+  async function handleUpload(files: File[]) {
+    try {
+      const data = await uploadImages(uid, files);
+
+      if (data.uploaded?.length) {
+        setAlbum((prev) =>
+          prev
+            ? {
+                ...prev,
+                images: [...prev.images, ...data.uploaded],
+              }
+            : prev
+        );
+      }
+
+      setIsUploadModalOpen(false);
+    } catch (err) {
+      console.error('Upload failed', err);
     }
   }
 
@@ -127,13 +151,23 @@ export default function Gallery() {
                   <ShareIcon classes='w-6 h-6' />
                 </button>
               )}
+              <button
+                onClick={() => setConfirmDeleteModalOpen(true)}
+                title='Delete Album'
+                className='p-2 rounded-md bg-red-500 text-white hover:bg-red-600 animate-colors justify-center flex'
+              >
+                <TrashIcon classes='h-5' />
+              </button>
             </div>
           }
         />
       )}
-      <button onClick={() => deleteAlbum(uid)}>Delete Album</button>
       {album?.images && album.images.length > 0 ? (
-        <GalleryLayout images={album?.images || []} deleteFn={deleteImage} />
+        <GalleryLayout
+          images={album?.images || []}
+          deleteFn={deleteImage}
+          albumUid={uid}
+        />
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}
@@ -157,8 +191,19 @@ export default function Gallery() {
       <MultiImageUploadModal
         open={isUploadModalOpen}
         setOpen={setIsUploadModalOpen}
-        onUpload={(files) => uploadImages(uid, files)}
+        onUpload={handleUpload}
         albumTitle={album?.album.title}
+      />
+      <ModalForm
+        open={confirmDeleteModalOpen}
+        setOpen={setConfirmDeleteModalOpen}
+        title='Confirm Delete Album'
+        formFields={
+          'Are you sure you want to delete this album? This action cannot be undone.'
+        }
+        submitText='Delete Album'
+        onSubmit={() => handleDeleteAlbum(uid)}
+        description={''}
       />
     </>
   );

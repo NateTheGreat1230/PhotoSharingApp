@@ -3,6 +3,7 @@ import GalleryLayout from '../components/ui/galleryLayout';
 import {
   getSharedAlbum,
   uploadSharedImages,
+  deleteSharedImage,
   type SharedAlbum,
 } from '../api/shared';
 import Loading from '../components/ui/loading';
@@ -26,6 +27,27 @@ export default function Shared() {
       })
       .finally(() => setLoading(false));
   }, [uid]);
+
+  async function handleUpload(files: File[]) {
+    try {
+      const data = await uploadSharedImages(uid, files);
+
+      if (data.uploaded?.length) {
+        setAlbum((prev) =>
+          prev
+            ? {
+                ...prev,
+                images: [...prev.images, ...data.uploaded],
+              }
+            : prev
+        );
+      }
+
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Upload failed', err);
+    }
+  }
 
   if (loading) {
     return <Loading />;
@@ -57,14 +79,18 @@ export default function Shared() {
         />
       )}
       {album?.images && album.images.length > 0 ? (
-        <GalleryLayout images={album?.images || []} deleteFn={() => {}} />
+        <GalleryLayout
+          images={album?.images || []}
+          deleteFn={deleteSharedImage}
+          albumUid={uid}
+        />
       ) : (
         <p className='text-text/70'>No images in this album yet.</p>
       )}
       <MultiImageUploadModal
         open={isModalOpen}
         setOpen={setIsModalOpen}
-        onUpload={(files) => uploadSharedImages(uid, files)}
+        onUpload={handleUpload}
         albumTitle={album?.album.title}
       />
     </>

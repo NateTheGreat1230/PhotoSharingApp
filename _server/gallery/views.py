@@ -6,6 +6,18 @@ import json
 
 
 @login_required
+def get_profile_data(request):
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    user = request.user
+    profile_data = {
+        "number_of_albums": user.album_set.count(),
+        "number_of_images": sum(album.images.count() for album in user.album_set.all()),
+    }
+    return JsonResponse({"profile_data": profile_data}, status=200)
+
+
+@login_required
 def albums(request):
     if request.method == "GET":
         albums = [
@@ -124,7 +136,7 @@ def upload_images(request, uid):
             uploaded.append(
                 {
                     "uid": str(img.uid),
-                    "file": img.file.url,
+                    "file": f"/gallery/images/{img.uid}/",
                     "uploaded_at": img.uploaded_at.isoformat(),
                 }
             )
@@ -276,7 +288,7 @@ def upload_shared_images(request, uid):
             uploaded.append(
                 {
                     "uid": str(img.uid),
-                    "file": img.file.url,
+                    "file": f"/gallery/shared/{shared_link.uid}/images/{img.uid}/",
                     "uploaded_at": img.uploaded_at.isoformat(),
                 }
             )

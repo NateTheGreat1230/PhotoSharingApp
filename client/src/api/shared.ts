@@ -58,7 +58,7 @@ export async function deleteSharedImage(sharedUid: string, imageUid: string) {
   if (!csrfToken) throw new Error('CSRF token not found');
 
   const response = await fetch(
-    `${API_BASE}/${sharedUid}/images/${imageUid}/delete/`,
+    `${API_BASE}/${sharedUid}images/${imageUid}/delete/`,
     {
       method: 'DELETE',
       credentials: 'same-origin',

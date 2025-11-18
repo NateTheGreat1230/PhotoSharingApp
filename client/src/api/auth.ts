@@ -10,6 +10,11 @@ export type User = {
   email: string;
 };
 
+export type ProfileData = {
+  number_of_albums: number;
+  number_of_images: number;
+};
+
 export async function logout() {
   const response = await fetch(`${API_BASE}/logout/`, {
     credentials: 'same-origin',
@@ -35,4 +40,13 @@ export async function getUser() {
   const userData: User = await response.json();
   userData.full_name = `${userData.first_name} ${userData.last_name}`;
   return userData;
+}
+
+export async function getProfileData() {
+  const response = await fetch(`/gallery/user/profile_data/`, {
+    credentials: 'same-origin',
+  });
+  if (!response.ok) throw new Error('Failed to fetch profile data');
+  const data = await response.json();
+  return data.profile_data;
 }

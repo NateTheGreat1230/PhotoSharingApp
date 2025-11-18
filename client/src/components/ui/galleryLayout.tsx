@@ -5,9 +5,11 @@ import Modal from './modal';
 export default function GalleryLayout({
   images,
   deleteFn,
+  albumUid,
 }: {
   images: Image[];
   deleteFn: (albumUid: string, imageUid: string) => void;
+  albumUid?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rows, setRows] = useState<
@@ -15,13 +17,18 @@ export default function GalleryLayout({
   >([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState<Image | null>(null);
+  const [localImages, setLocalImages] = useState<Image[]>(images);
 
   const baseHeight = 180;
   const gap = 8;
 
+  useEffect(() => {
+    setLocalImages(images);
+  }, [images]);
+
   // Load each image to get its aspect ratio
   useEffect(() => {
-    if (!images?.length) {
+    if (!localImages?.length) {
       setRows([]);
       return;
     }
@@ -29,7 +36,7 @@ export default function GalleryLayout({
     const loadImages = async () => {
       const loaded: { uid: string; src: string; r: number }[] =
         await Promise.all(
-          images.map(
+          localImages.map(
             (img) =>
               new Promise<{ uid: string; src: string; r: number }>(
                 (resolve) => {
@@ -94,19 +101,19 @@ export default function GalleryLayout({
     };
 
     loadImages();
-  }, [images]);
+  }, [localImages]);
 
-  function handleDeleteImage(albumUid: string, imageUid: string) {
-    deleteFn(albumUid, imageUid);
+  function handleDeleteImage(imageUid: string) {
+    deleteFn(albumUid || '', imageUid);
+    setLocalImages((prev) => prev.filter((img) => img.uid !== imageUid));
     if (modalImage?.uid === imageUid) {
-      setModalOpen(false);
       setModalImage(null);
+      setModalOpen(false);
     }
   }
 
   async function downloadOrOpenImage(url: string, filename: string) {
     try {
-      // Check if Web Share API with files is supported
       if (navigator.canShare && navigator.canShare({ files: [] })) {
         const response = await fetch(url);
         const blob = await response.blob();
@@ -116,7 +123,6 @@ export default function GalleryLayout({
           title: filename,
         });
       } else {
-        // Fallback: traditional download
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
@@ -126,22 +132,9 @@ export default function GalleryLayout({
       }
     } catch (err) {
       console.error('Download/share failed', err);
-      // Fallback to open in new tab for iOS Safari
       window.open(url, '_blank');
     }
   }
-  // function downloadOrOpenImage(url: string, filename: string) {
-  //   if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-  //     window.open(url, '_blank');
-  //   } else {
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = filename;
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     document.body.removeChild(a);
-  //   }
-  // }
 
   return (
     <div ref={containerRef} className='flex flex-col gap-2'>
@@ -153,7 +146,7 @@ export default function GalleryLayout({
               onClick={() => {
                 setModalOpen(true);
                 setModalImage(
-                  images.find((image) => image.uid === img.uid) || null
+                  localImages.find((image) => image.uid === img.uid) || null
                 );
               }}
             >
@@ -185,7 +178,7 @@ export default function GalleryLayout({
                 <button
                   onClick={() => {
                     if (modalImage) {
-                      handleDeleteImage(modalImage.album, modalImage.uid);
+                      handleDeleteImage(modalImage.uid);
                     }
                   }}
                   className='btn-secondary'
