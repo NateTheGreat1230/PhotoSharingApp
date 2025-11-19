@@ -23,7 +23,7 @@ export default function AlbumInfoCard({
   function handleCopyShareInfo() {
     if (!shared_link) return;
 
-    const shareText = `Share this album:\n\nLink: ${shared_link.link}\nPassphrase: ${shared_link.uid}`;
+    const shareText = `Share this album:\n\nLink: ${shared_link.link}\nPassphrase: ${shared_link.passphrase}`;
 
     navigator.clipboard.writeText(shareText).then(() => {
       setCopied(true);

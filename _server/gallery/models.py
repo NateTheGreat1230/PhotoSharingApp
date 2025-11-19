@@ -28,9 +28,11 @@ class SharedLink(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE)
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     passphrase = models.CharField(max_length=255)
+    passphrase_raw = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def set_passphrase(self, raw):
+        self.passphrase_raw = raw
         self.passphrase = make_password(raw)
 
     def check_passphrase(self, raw):

@@ -39,12 +39,9 @@ export default function Gallery() {
 
   async function handleShare() {
     if (passphrase.trim() === '' || !album) return;
-
     try {
       const data = await shareAlbum(uid, passphrase);
-
-      alert(`Shareable Link: ${data.link}\nPassphrase: ${passphrase}`);
-
+      console.log('Share data:', data);
       setAlbum({
         ...album,
         is_shared: true,
@@ -52,6 +49,7 @@ export default function Gallery() {
           uid: data.uid,
           link: data.link,
           created_at: data.created_at,
+          passphrase: passphrase,
         },
       });
     } catch (err) {
@@ -84,7 +82,6 @@ export default function Gallery() {
   async function handleUpload(files: File[]) {
     try {
       const data = await uploadImages(uid, files);
-
       if (data.uploaded?.length) {
         setAlbum((prev) =>
           prev
@@ -95,7 +92,6 @@ export default function Gallery() {
             : prev
         );
       }
-
       setIsUploadModalOpen(false);
     } catch (err) {
       console.error('Upload failed', err);

@@ -22,6 +22,7 @@ export type SharedLink = {
   uid: string;
   created_at: string;
   link: string;
+  passphrase: string;
 };
 
 export type Album = {
@@ -151,7 +152,6 @@ export async function shareAlbum(uid: string, passphrase: string) {
   });
   if (!response.ok) throw new Error('Failed to share album');
   const sharedLink: SharedLink = await response.json();
-  console.log('Raw shared link data:', sharedLink);
   if (sharedLink) {
     sharedLink.link = `http://127.0.0.1:8000${sharedLink.link}`;
   }

@@ -90,6 +90,7 @@ def get_album(request, uid):
                     "uid": str(shared[0].uid),
                     "created_at": shared[0].created_at.isoformat(),
                     "link": f"/registration/shared/{shared[0].uid}/authenticate/",
+                    "passphrase": shared[0].passphrase_raw,
                 }
                 if is_shared
                 else None
@@ -202,11 +203,10 @@ def create_shared_link(request, uid):
     shared_link.save()
     return JsonResponse(
         {
-            "shared_link": {
-                "uid": str(shared_link.uid),
-                "created_at": shared_link.created_at.isoformat(),
-                "link": f"/registration/shared/{shared_link.uid}/authenticate/",
-            }
+            "uid": str(shared_link.uid),
+            "created_at": shared_link.created_at.isoformat(),
+            "link": f"/registration/shared/{shared_link.uid}/authenticate/",
+            "passphrase": shared_link.passphrase_raw,
         },
         status=201,
     )
