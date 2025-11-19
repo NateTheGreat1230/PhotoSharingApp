@@ -42,12 +42,10 @@ def albums(request):
         album = Album.objects.create(owner=request.user, title=title)
         return JsonResponse(
             {
-                "album": {
-                    "uid": str(album.uid),
-                    "title": album.title,
-                    "owner": album.owner.username,
-                    "created_at": album.created_at.isoformat(),
-                }
+                "uid": str(album.uid),
+                "title": album.title,
+                "owner": album.owner.username,
+                "created_at": album.created_at.isoformat(),
             },
             status=201,
         )

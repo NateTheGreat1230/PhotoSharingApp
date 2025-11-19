@@ -37,10 +37,6 @@ export default function Gallery() {
       .finally(() => setLoading(false));
   }, [uid]);
 
-  useEffect(() => {
-    console.log('Album data updated:', album);
-  }, [album]);
-
   async function handleShare() {
     if (passphrase.trim() === '' || !album) return;
 

@@ -8,6 +8,7 @@ export type AlbumList = {
     title: string;
     created_at: string;
   }[];
+  length: number;
 };
 
 export type Image = {
@@ -40,7 +41,9 @@ export async function fetchAlbums() {
     credentials: 'same-origin',
   });
   if (!response.ok) throw new Error('Failed to fetch albums');
-  return response.json();
+  const data: AlbumList = await response.json();
+  data.length = data.albums.length;
+  return data;
 }
 
 export async function createAlbum(title: string) {
