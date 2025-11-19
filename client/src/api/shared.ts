@@ -1,4 +1,5 @@
 const API_BASE = '/gallery/shared';
+const BASE_URL = import.meta.env.VITE_API_BASE || window.location.origin;
 import * as cookie from 'cookie';
 
 export type SharedAlbum = {
@@ -26,7 +27,7 @@ export async function getSharedAlbum(uid: string) {
   const albumData: SharedAlbum = await response.json();
   albumData.images = albumData.images.map((img) => ({
     ...img,
-    file: `http://127.0.0.1:8000${img.file}`,
+    file: `${BASE_URL}${img.file}`,
   }));
   return albumData;
 }

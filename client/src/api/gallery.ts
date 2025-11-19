@@ -1,4 +1,5 @@
 const API_BASE = '/gallery';
+const BASE_URL = import.meta.env.VITE_API_BASE || window.location.origin;
 import * as cookie from 'cookie';
 
 export type AlbumList = {
@@ -73,12 +74,12 @@ export async function fetchAlbum(uid: string) {
   const albumData: Album = await response.json();
   albumData.images = albumData.images.map((img) => ({
     ...img,
-    file: `http://127.0.0.1:8000${img.file}`,
+    file: `${BASE_URL}${img.file}`,
   }));
   if (albumData.is_shared) {
     albumData.shared_link = {
       ...albumData.shared_link!,
-      link: `http://127.0.0.1:8000${albumData.shared_link!.link}`,
+      link: `${BASE_URL}${albumData.shared_link!.link}`,
     };
   }
   return albumData;
@@ -153,7 +154,7 @@ export async function shareAlbum(uid: string, passphrase: string) {
   if (!response.ok) throw new Error('Failed to share album');
   const sharedLink: SharedLink = await response.json();
   if (sharedLink) {
-    sharedLink.link = `http://127.0.0.1:8000${sharedLink.link}`;
+    sharedLink.link = `${BASE_URL}${sharedLink.link}`;
   }
   return sharedLink;
 }

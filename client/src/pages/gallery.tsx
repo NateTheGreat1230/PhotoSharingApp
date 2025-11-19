@@ -41,7 +41,6 @@ export default function Gallery() {
     if (passphrase.trim() === '' || !album) return;
     try {
       const data = await shareAlbum(uid, passphrase);
-      console.log('Share data:', data);
       setAlbum({
         ...album,
         is_shared: true,
